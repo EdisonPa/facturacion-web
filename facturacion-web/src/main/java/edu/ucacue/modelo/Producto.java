@@ -1,5 +1,7 @@
 package edu.ucacue.modelo;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -7,77 +9,73 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+
 @Entity
-@Table(name="productos")
-public class Producto {
+@Table(name = "producto")
+public class Producto implements Serializable {
 	
-	@Id
+	private static final long serialVersionUID = 1607830177598686701L;
+	
+	@Id 
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	
-	@Column(length = 30)
+	@Column(nullable = true)
 	private String nombre;
 	private String descripcion;
 	private double precio;
-	private String stock;
+	private int stock;
 	
-	
-	
-	public Producto(String nombre, String descripcion, double precio, String stock) {
+	public Producto() {
+	}
+
+	public Producto(int id, String nombre, String descripcion, double precio, int stock) {
 		super();
+		this.id = id;
 		this.nombre = nombre;
 		this.descripcion = descripcion;
 		this.precio = precio;
 		this.stock = stock;
 	}
-	
-	
-	public Producto() {
-		super();
+
+	public int getId() {
+		return id;
 	}
-	
-	
-	//get and set
-	
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
 	public String getNombre() {
 		return nombre;
 	}
-
 
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
 
-
 	public String getDescripcion() {
 		return descripcion;
 	}
-
 
 	public void setDescripcion(String descripcion) {
 		this.descripcion = descripcion;
 	}
 
-
 	public double getPrecio() {
 		return precio;
 	}
-
 
 	public void setPrecio(double precio) {
 		this.precio = precio;
 	}
 
-
-	public String getStock() {
+	public int getStock() {
 		return stock;
 	}
 
-
-	public void setStock(String cantidad) {
-		this.stock = cantidad;
+	public void setStock(int stock) {
+		this.stock = stock;
 	}
+}
 
-	
-	
-	}

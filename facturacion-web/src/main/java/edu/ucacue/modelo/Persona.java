@@ -86,15 +86,5 @@ public class Persona implements Serializable {
 
 	public void setCedula(String cedula) {
 		this.cedula = cedula;
-	}
-	
-	
-
-	
-
-	
-	
-	
-	
-	
+	}	
 }

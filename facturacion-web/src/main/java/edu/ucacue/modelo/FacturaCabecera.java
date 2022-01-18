@@ -1,9 +1,11 @@
 package edu.ucacue.modelo;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -14,29 +16,34 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import edu.ucacue.modelo.DetalleFactura;
-import edu.ucacue.modelo.Persona;
-
 @Entity
 @Table(name="facturas_cabeceras")
-public class FacturaCabecera {
-
+public class FacturaCabecera implements Serializable {
+	
+	private static final long serialVersionUID = 1607830177598686701L;
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
+	
+	@Column(unique = true)
 	private int numeroFactura;
+	
 	private Date fechaEmision;
 	private Double totalFactura;
-
+	
 	@ManyToOne
 	@JoinColumn(name = "persona_fk")
 	private Persona persona;
-
+	
 	@OneToMany(mappedBy = "idFactura", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private List<DetalleFactura> detallesFacturas;
-
-
+	
+	public FacturaCabecera() {
+		
+	}
+	
 	public int getId() {
 		return id;
 	}
@@ -77,8 +84,5 @@ public class FacturaCabecera {
 			total=total+detalleFactura.getValorVenta();
 		}
 		this.totalFactura=total;
-
 	}
-
-
 }

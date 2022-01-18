@@ -1,97 +1,86 @@
 package edu.ucacue.controller;
 
+import java.util.HashMap;
 import java.util.List;
-
-import javax.swing.table.AbstractTableModel;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.ucacue.infraestructura.repository.DetalleFacturaRepositorio;
 import edu.ucacue.infraestructura.repository.FacturaCabeceraRepositorio;
 import edu.ucacue.modelo.DetalleFactura;
 
 @RestController
 @RequestMapping("/api")
-public class FacturaRestController extends AbstractTableModel {
+public class FacturaRestController {
 
+
+	@Autowired
+	private DetalleFacturaRepositorio dfr;
 	
-	private static final long serialVersionUID = 1L;
-	private List<DetalleFactura> detallesFacturas;
-	private static final String[] COLUMN_NAMES = {"id","Producto", "Precio","Cantidad", "Valor de Venta"};
+	@Autowired
+	private FacturaCabeceraRepositorio fcr;
+	
 
-	public FacturaRestController(List<DetalleFactura> detallesFacturas) {
-
-		this.detallesFacturas = detallesFacturas;
-
+	@GetMapping("/facturas")
+	public List<DetalleFactura> index() {
+		return dfr.findAll();
+	}
+	
+	@GetMapping("facturas/ventasDiarias")
+	public List<DetalleFactura> index1() {
+		return dfr.findAll();
+	}
+	
+	@GetMapping("inventario")
+	public List<DetalleFactura> index2() {
+		return dfr.findAll();
 	}
 
-	@Override
-	public int getRowCount() {
-		return detallesFacturas.size();
+	@GetMapping("/facturas/{id}")
+	public DetalleFactura getById(@PathVariable int id) {
+
+		DetalleFactura detalleFactura = dfr.findById(id).get();
+		return detalleFactura;
 	}
+	
+	@PostMapping("/factura")
+	public ResponseEntity<?> saveFactura(@RequestBody DetalleFactura dF, BindingResult result) {
+		DetalleFactura facturaGrabar;
+		Map<String, Object> response = new HashMap<>();
 
-	@Override
-	public int getColumnCount() {
-		return 5;
-	}
-
-	@Override
-	public Object getValueAt(int rowIndex, int columnIndex) {
-
-		Object value = "??";
-		DetalleFactura dF = detallesFacturas.get(rowIndex);
-		switch (columnIndex) {
-		case 0:
-			value = dF.getIdFactura();
-			break;
-		case 1:
-			value = dF.getProducto().getNombre();
-			break;
-		case 2:
-			value = dF.getProducto().getPrecio();
-			break;
-		case 3:
-			value = dF.getCantidad();
-			break;
-
-		case 4:
-			value =dF.getValorVenta();
-			break;
+		if (result.hasErrors()) {
+			List<String> errores = result.getFieldErrors().stream()
+					.map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage())
+					.collect(Collectors.toList());
+			response.put("Los errores son", errores);
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
 		}
 
-		return value;
+		try {
+			facturaGrabar = dfr.save(dF);
+		} catch (DataAccessException e) {
+			response.put("mensaje", "Error al realizar el inserción en la base de datos");
+			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 
-	}
+		response.put("mensaje", "La factura se ha insertado con éxito en la BD");
+		response.put("Factura", facturaGrabar);
 
-	@Override
-    public Class<?> getColumnClass(int columnIndex) {
-        return DetalleFactura.class;
-    }
-
-    //the column header
-    @Override
-    public String getColumnName(int column) {
-        return COLUMN_NAMES[column];
-    }
-
-	/*
-	 * Override this if you want the values to be editable...
-	 * 
-	 * @Override public void setValueAt(Object aValue, int rowIndex, int
-	 * columnIndex) { //.... }
-	 */
-
-	/**
-	 * This will return the user at the specified row...
-	 * 
-	 * @param row
-	 * @return
-	 */
-	public DetalleFactura getDetalleFacturaAt(int row) {
-		return detallesFacturas.get(row);
+		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 	
 	
-
 }
